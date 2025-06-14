@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { useSearchParams, useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { LoadingScreen } from "@/components/ui/loading-screen";
+import { Eye, EyeOff } from "lucide-react";
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -31,6 +32,7 @@ function SignInForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -169,13 +171,31 @@ function SignInForm() {
                         Forgot password?
                       </Link>
                     </div>
-                    <Input
-                      id="password"
-                      name="password"
-                      type="password"
-                      required
-                      disabled={isLoading}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        required
+                        disabled={isLoading}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        )}
+                        <span className="sr-only">
+                          {showPassword ? "Hide password" : "Show password"}
+                        </span>
+                      </Button>
+                    </div>
                   </div>
                   <Button className="w-full" type="submit" disabled={isLoading}>
                     {isLoading ? "Signing in..." : "Sign in"}

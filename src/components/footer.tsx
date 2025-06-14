@@ -152,8 +152,8 @@ export function Footer() {
                 </li>
                 <li>
                   <a 
-                    href="https://facebook.com/404monetizer" 
-                    target="_blank" 
+                    href="https://www.facebook.com/profile.php?id=61577221176073/" 
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm text-muted-foreground hover:text-foreground"
                   >

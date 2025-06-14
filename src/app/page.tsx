@@ -5,14 +5,15 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Activity, DollarSign, Users, ArrowUpRight, Check } from "lucide-react";
-import { motion } from "framer-motion";
+import { Activity, DollarSign, Users, ArrowUpRight, Check, ArrowUp } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useAuth } from "@/contexts/auth-context";
 import { hasProAccess } from "@/lib/plan-utils";
 import { useRazorpay } from "@/hooks/useRazorpay";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -33,6 +34,23 @@ export default function Home() {
   const { user } = useAuth();
   const { processPayment, loading } = useRazorpay();
   const router = useRouter();
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
 
   const handleProAccess = async (e: React.MouseEvent) => {
     if (!user) {
@@ -69,7 +87,10 @@ export default function Home() {
           className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl"
         >
           <motion.span 
+            className="inline-block"
             animate={{
+              scale: [1, 1.1, 1],
+              rotate: [0, 0, 0],
               color: [
                 "hsl(var(--primary))",
                 "hsl(var(--secondary))", 
@@ -88,12 +109,10 @@ export default function Home() {
         </motion.h1>
         <motion.p 
           variants={fadeIn}
-          className="max-w-[800px] text-lg text-muted-foreground mt-4 md:text-xl leading-relaxed"
+          className="mt-6 text-xl text-muted-foreground max-w-3xl"
         >
-          <span className="text-foreground font-semibold">Turn Dead Ends into Gold Mines.</span>{" "}
-          Every broken link is a hidden opportunity waiting to be unleashed. Stop letting valuable visitors 
-          slip away — capture them, convert them, and watch your revenue skyrocket with our revolutionary 
-          404 error monetization platform.
+          Transform your 404 error pages into revenue-generating opportunities.
+          No more wasted traffic, recover those visitors, subscribers, leads and boost your revenue with just one click.
         </motion.p>
         <motion.div 
           variants={fadeIn}
@@ -938,6 +957,21 @@ export default function Home() {
           </motion.div>
         </div>
       </motion.section>
+
+      {/* Scroll to Top Button */}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            onClick={scrollToTop}
+            className="fixed bottom-8 right-8 p-3 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors z-50"
+          >
+            <ArrowUp className="h-6 w-6" />
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

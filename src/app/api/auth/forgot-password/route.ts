@@ -31,8 +31,8 @@ export async function POST(req: Request) {
     // Generate 6-digit reset code
     const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
     
-    // Set expiry to 15 minutes from now
-    const expiryTime = new Date(Date.now() + 15 * 60 * 1000);
+    // Set expiry to 2 minutes from now
+    const expiryTime = new Date(Date.now() + 2 * 60 * 1000);
 
     // Update user with reset token
     await db.execute(

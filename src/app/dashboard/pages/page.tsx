@@ -431,7 +431,6 @@ export default function PagesPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => window.open(`/view/${page.id}`, '_blank')}
-                                disabled={user?.plan !== 'pro'}
                                 className="flex items-center space-x-1"
                               >
                                 <ExternalLink className="h-4 w-4" />
