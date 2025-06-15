@@ -100,6 +100,14 @@ export function Footer() {
                     </Link>
                   </li>
                 )}
+                <li>
+                  <Link 
+                    href="/shipping-delivery" 
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    Shipping and Delivery
+                  </Link>
+                </li>
               </ul>
             </div>
 
@@ -121,6 +129,14 @@ export function Footer() {
                     className="text-sm text-muted-foreground hover:text-foreground"
                   >
                     Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    href="/cancellation-refund" 
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    Cancellation and Refund Policy
                   </Link>
                 </li>
               </ul>

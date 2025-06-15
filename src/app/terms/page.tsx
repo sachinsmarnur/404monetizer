@@ -34,7 +34,7 @@ export default function TermsPage() {
             <motion.div variants={fadeIn} className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl font-bold mb-6">Terms of Service</h1>
               <p className="text-xl text-muted-foreground mb-8">
-                Last updated: {new Date().toLocaleDateString()}
+                Last updated: 12/06/2025
               </p>
               <p className="text-muted-foreground">
                 These Terms of Service govern your use of 404 Monetizer services. By accessing or using our platform, you agree to be bound by these terms.

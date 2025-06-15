@@ -34,7 +34,7 @@ export default function PrivacyPage() {
             <motion.div variants={fadeIn} className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl font-bold mb-6">Privacy Policy</h1>
               <p className="text-xl text-muted-foreground mb-8">
-                Last updated: {new Date().toLocaleDateString()}
+                Last updated: 12/06/2025
               </p>
               <p className="text-muted-foreground">
                 Your privacy is important to us. This Privacy Policy explains how 404 Monetizer collects, uses, and protects your information when you use our services.

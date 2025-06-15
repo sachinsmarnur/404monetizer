@@ -131,7 +131,7 @@ export async function POST(
             ) VALUES (?, ?, 1, 0, 0, ?, ?, ?, ?)`,
             [
               page.user_id,
-              params.id,
+              resolvedParams.id,
               today,
               eventData?.referrerUrl || null,
               eventData?.deviceType || 'desktop',
@@ -154,7 +154,7 @@ export async function POST(
         // Check if there's already an analytics entry for today
         const [existingAnalytics]: any = await db.query(
           "SELECT id, revenue FROM analytics WHERE user_id = ? AND page_id = ? AND date = ?",
-          [page.user_id, params.id, today]
+          [page.user_id, resolvedParams.id, today]
         );
 
         if (existingAnalytics && existingAnalytics.length > 0) {
@@ -179,7 +179,7 @@ export async function POST(
             ) VALUES (?, ?, 0, 1, ?, ?, ?, ?, ?)`,
             [
               page.user_id, 
-              params.id, 
+              resolvedParams.id, 
               estimatedRevenue, 
               today,
               eventData?.referrerUrl || null,
@@ -193,7 +193,7 @@ export async function POST(
 
     const response = NextResponse.json({ 
       message: "Event recorded successfully",
-      pageId: params.id,
+      pageId: resolvedParams.id,
       eventType,
       tracked: shouldTrackAnalytics,
       timestamp: new Date().toISOString()
