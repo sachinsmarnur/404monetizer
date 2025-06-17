@@ -1721,17 +1721,17 @@ export function UseCodeTab({ pageId, domain = "your-domain.com", page, user }: U
                 if (email) {
                     // Determine the source and estimated revenue
                     let source = 'email_collection';
-                    let estimatedRevenue = 1.67; // Average email lead value
+                    let estimatedRevenue = 0.03; // Average email lead value
                     
                     if (form.closest('.email-collection-form')) {
                         source = 'email_collection';
-                        estimatedRevenue = 1.23;
+                        estimatedRevenue = 0.04;
                     } else if (form.closest('[class*="newsletter"]')) {
                         source = 'newsletter_signup';
-                        estimatedRevenue = 1.00;
+                        estimatedRevenue = 0.02;
                     } else if (form.closest('[class*="lead-magnet"]')) {
                         source = 'lead_magnet_download';
-                        estimatedRevenue = 1.25;
+                        estimatedRevenue = 0.01;
                     }
                     
                     // Track email collection event with revenue
@@ -1769,16 +1769,16 @@ export function UseCodeTab({ pageId, domain = "your-domain.com", page, user }: U
                     const urlMatch = onclickStr.match(/window\\.open\\(['"]([^'"]+)['"]\\)/);
                     if (urlMatch) {
                         // Estimate revenue based on affiliate commission (average 5-10%)
-                        let estimatedRevenue = 1.56; // Conservative estimate for affiliate commission
+                        let estimatedRevenue = 0.07; // Conservative estimate for affiliate commission
                         let clickType = 'affiliate_link';
                         
                         // Check if it's a product showcase vs regular affiliate link
                         if (target.closest('[class*="product"]')) {
                             clickType = 'product_click';
-                            estimatedRevenue = 2.75; // Higher value for product clicks
+                            estimatedRevenue = 0.07; // Higher value for product clicks
                         } else if (target.closest('[class*="sponsor"]')) {
                             clickType = 'sponsored_click';
-                            estimatedRevenue = 1.55; // Sponsored content click value
+                            estimatedRevenue = 0.98; // Sponsored content click value
                         }
                         
                         trackExternalEvent('affiliate_click', {
@@ -1796,7 +1796,7 @@ export function UseCodeTab({ pageId, domain = "your-domain.com", page, user }: U
                 if (target && target.textContent && target.textContent.toLowerCase().includes('donat')) {
                     trackExternalEvent('donation_click', {
                         buttonText: target.textContent,
-                        estimatedRevenue: 2.97, // Average donation amount
+                        estimatedRevenue: 0.36, // Average donation amount
                         conversionType: 'donation',
                         timestamp: new Date().toISOString()
                     });
@@ -1806,7 +1806,7 @@ export function UseCodeTab({ pageId, domain = "your-domain.com", page, user }: U
                 if (target && target.closest('[data-expiry]')) {
                     trackExternalEvent('countdown_click', {
                         offerElement: target.tagName,
-                        estimatedRevenue: 1.69, // Higher value for time-sensitive offers
+                        estimatedRevenue: 0.02, // Higher value for time-sensitive offers
                         conversionType: 'offer_conversion',
                         timestamp: new Date().toISOString()
                     });
@@ -1818,7 +1818,7 @@ export function UseCodeTab({ pageId, domain = "your-domain.com", page, user }: U
             window.unlockContent = function(button) {
                 trackExternalEvent('content_unlock', {
                     unlockMethod: 'click',
-                    estimatedRevenue: 0.58, // Value of engaged user
+                    estimatedRevenue: 0.058, // Value of engaged user
                     conversionType: 'engagement',
                     timestamp: new Date().toISOString()
                 });
@@ -1833,7 +1833,7 @@ export function UseCodeTab({ pageId, domain = "your-domain.com", page, user }: U
                 if (e.target.closest('.adsbygoogle') || e.target.closest('[class*="ad"]')) {
                     trackExternalEvent('ad_click', {
                         adType: 'adsense',
-                        estimatedRevenue: 0.09, // Average AdSense click value
+                        estimatedRevenue: 0.067, // Average AdSense click value
                         conversionType: 'ad_revenue',
                         timestamp: new Date().toISOString()
                     });
@@ -1845,7 +1845,7 @@ export function UseCodeTab({ pageId, domain = "your-domain.com", page, user }: U
             window.showExitIntent = function() {
                 trackExternalEvent('exit_intent_shown', {
                     triggerType: 'exit_detection',
-                    estimatedRevenue: 0, // No direct revenue, but valuable engagement data
+                    estimatedRevenue: 0.094, // No direct revenue, but valuable engagement data
                     conversionType: 'engagement',
                     timestamp: new Date().toISOString()
                 });

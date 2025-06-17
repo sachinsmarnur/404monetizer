@@ -100,14 +100,6 @@ export function Footer() {
                     </Link>
                   </li>
                 )}
-                <li>
-                  <Link 
-                    href="/shipping-delivery" 
-                    className="text-sm text-muted-foreground hover:text-foreground"
-                  >
-                    Shipping and Delivery
-                  </Link>
-                </li>
               </ul>
             </div>
 
