@@ -2,6 +2,7 @@ import "./globals.css";
 import LayoutClient from "./layout-client";
 import { metadata, viewport } from "./metadata";
 import { config } from "@/lib/config";
+import Script from "next/script";
 
 export { metadata, viewport };
 
@@ -22,8 +23,14 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/favicon.svg" />
         
         {/* Google tag (gtag.js) */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17225224396"></script>
-        <script
+        <Script 
+          async 
+          src="https://www.googletagmanager.com/gtag/js?id=AW-17225224396" 
+          strategy="afterInteractive" 
+        />
+        <Script
+          id="google-gtag"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
