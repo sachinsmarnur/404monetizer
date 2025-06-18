@@ -2,12 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyAuth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { Page404 } from "@/types/page";
+import { 
+  handleDatabaseError, 
+  createUnauthorizedResponse, 
+  createNotFoundResponse,
+  createValidationErrorResponse,
+  createForbiddenResponse,
+  handleError 
+} from "@/lib/error-handler";
 
 export async function GET(request: NextRequest) {
   try {
     const userId = await verifyAuth(request);
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return createUnauthorizedResponse();
     }
 
     // userId is already a number from verifyAuth
@@ -37,13 +45,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(pages);
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.error("Error fetching pages:", error);
-    }
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleError(error);
   }
 }
 
@@ -52,7 +54,7 @@ export async function POST(request: NextRequest) {
     // Get user ID from either NextAuth session or JWT token
     const userId = await verifyAuth(request);
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return createUnauthorizedResponse();
     }
 
     // Check user plan and page limits
@@ -62,7 +64,7 @@ export async function POST(request: NextRequest) {
     );
 
     if (userRows.length === 0) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return createNotFoundResponse("User");
     }
 
     const userPlan = userRows[0].plan;
@@ -77,15 +79,9 @@ export async function POST(request: NextRequest) {
 
     // Check plan limits
     if (userPlan === 'free' && existingPageCount >= 1) {
-      return NextResponse.json(
-        { error: "Free plan allows only 1 page. Upgrade to Pro to create more pages." },
-        { status: 403 }
-      );
+      return createForbiddenResponse("Free plan allows only 1 page. Upgrade to Pro to create more pages.");
     } else if (userPlan === 'pro' && existingPageCount >= 50) {
-      return NextResponse.json(
-        { error: "You have reached the maximum limit of 50 pages for the Pro plan." },
-        { status: 403 }
-      );
+      return createForbiddenResponse("You have reached the maximum limit of 50 pages for the Pro plan.");
     }
 
     // userId is already a number from verifyAuth
@@ -93,10 +89,7 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!data.title) {
-      return NextResponse.json(
-        { error: "validation_error: Title is required" },
-        { status: 400 }
-      );
+      return createValidationErrorResponse("Title is required");
     }
 
     // Insert new page
@@ -142,19 +135,11 @@ export async function POST(request: NextRequest) {
       created_at: new Date().toISOString()
     });
   } catch (error: any) {
-    console.error("Error creating page:", error);
-    
     // Handle specific error types
     if (error.message.includes('validation')) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      );
+      return createValidationErrorResponse(error.message);
     }
     
-    return NextResponse.json(
-      { error: "Failed to create page" },
-      { status: 500 }
-    );
+    return handleError(error);
   }
 } 

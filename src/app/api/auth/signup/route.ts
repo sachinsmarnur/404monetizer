@@ -4,6 +4,12 @@ import { db } from '@/lib/db';
 import jwt from 'jsonwebtoken';
 import { config } from '@/lib/config';
 import type { RowDataPacket, ResultSetHeader } from 'mysql2';
+import { 
+  handleDatabaseError, 
+  createValidationErrorResponse, 
+  createRateLimitResponse,
+  handleError 
+} from '@/lib/error-handler';
 
 // Rate limiting storage (in production, use Redis)
 const ipRateLimiter = new Map<string, number[]>();
@@ -57,43 +63,28 @@ export async function POST(req: Request) {
     
     // IP-based rate limiting: 5 signups per 15 minutes
     if (!checkRateLimit(ipRateLimiter, ip, 5, ipWindowMs)) {
-      return NextResponse.json(
-        { error: 'Too many signup attempts from this IP. Please try again in 15 minutes.' },
-        { status: 429 }
-      );
+      return createRateLimitResponse('Too many signup attempts from this IP. Please try again in 15 minutes.');
     }
 
     // Validate input
     if (!name || !email || !password) {
-      return NextResponse.json(
-        { error: 'Name, email and password are required' },
-        { status: 400 }
-      );
+      return createValidationErrorResponse('Name, email and password are required');
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'Invalid email format' },
-        { status: 400 }
-      );
+      return createValidationErrorResponse('Invalid email format');
     }
 
     // Email-based rate limiting: 3 attempts per hour per email
     if (!checkRateLimit(emailRateLimiter, email.toLowerCase(), 3, emailWindowMs)) {
-      return NextResponse.json(
-        { error: 'Too many signup attempts for this email. Please try again later.' },
-        { status: 429 }
-      );
+      return createRateLimitResponse('Too many signup attempts for this email. Please try again later.');
     }
 
     // Password strength validation
     if (password.length < 8) {
-      return NextResponse.json(
-        { error: 'Password must be at least 8 characters long' },
-        { status: 400 }
-      );
+      return createValidationErrorResponse('Password must be at least 8 characters long');
     }
 
     // Hash password with performance monitoring
@@ -113,10 +104,7 @@ export async function POST(req: Request) {
       );
 
       if (existingUsers.length > 0) {
-        return NextResponse.json(
-          { error: 'A user with this email already exists' },
-          { status: 400 }
-        );
+        return createValidationErrorResponse('A user with this email already exists');
       }
 
       // Insert new user
@@ -151,22 +139,14 @@ export async function POST(req: Request) {
         }
       });
     } catch (dbError: any) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Database error:', dbError);
-      }
-      return NextResponse.json(
-        { error: 'A user with this email already exists' },
-        { status: 400 }
-      );
+      // This will be handled by the database error handler which provides generic responses
+      return handleDatabaseError(dbError);
     }
   } catch (error: any) {
     const totalDuration = Date.now() - startTime;
     if (process.env.NODE_ENV === 'development') {
       console.error(`Signup failed after ${totalDuration}ms:`, error);
     }
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return handleError(error);
   }
 } 

@@ -9,4 +9,8 @@ export const config = {
   jwt: {
     secret: process.env.JWT_SECRET,
   },
+  recaptcha: {
+    siteKey: process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
+    secretKey: process.env.RECAPTCHA_SECRET_KEY,
+  },
 } as const; 

@@ -3,6 +3,12 @@ import { db } from '@/lib/db';
 import nodemailer from 'nodemailer';
 import * as EmailValidator from 'email-validator';
 import disposableEmailDomains from 'disposable-email-domains';
+import { 
+  handleDatabaseError, 
+  createValidationErrorResponse, 
+  createRateLimitResponse,
+  handleError 
+} from '@/lib/error-handler';
 
 // Configure the email transporter
 const transporter = nodemailer.createTransport({
@@ -338,18 +344,10 @@ export async function POST(request: NextRequest) {
 
     } catch (dbError) {
       connection.release();
-      console.error('Database error:', dbError);
-      return NextResponse.json(
-        { error: 'We apologize, but there was an issue processing your message. Please try again later or contact us directly at support@404monetizer.com.' },
-        { status: 500 }
-      );
+      return handleDatabaseError(dbError);
     }
 
   } catch (error) {
-    console.error('Contact form error:', error);
-    return NextResponse.json(
-      { error: 'We apologize, but there was an unexpected error. Please try again later or contact us directly at support@404monetizer.com.' },
-      { status: 500 }
-    );
+    return handleError(error);
   }
 } 

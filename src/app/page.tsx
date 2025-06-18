@@ -15,6 +15,7 @@ import { useRazorpay } from "@/hooks/useRazorpay";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Head from "next/head";
+import { useRecaptcha } from "@/hooks/useRecaptcha";
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -71,6 +72,12 @@ export default function Home() {
   const { processPayment, loading } = useRazorpay();
   const router = useRouter();
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const { detectBot, isLoaded } = useRecaptcha();
+  const [botDetectionResult, setBotDetectionResult] = useState<{
+    isBot: boolean;
+    score?: number;
+    timestamp?: string;
+  } | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -80,6 +87,46 @@ export default function Home() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Bot detection on page load
+  useEffect(() => {
+    const performBotDetection = async () => {
+      if (!isLoaded) return;
+
+      try {
+        const isBot = await detectBot('homepage_load');
+        const result = {
+          isBot,
+          timestamp: new Date().toISOString()
+        };
+        
+        setBotDetectionResult(result);
+
+        // Log the result for monitoring (remove in production)
+        console.log('Bot detection result:', result);
+
+        // Optional: You can take actions based on bot detection
+        if (isBot) {
+          // Handle bot traffic (e.g., show different content, track separately, etc.)
+          console.warn('Bot detected on homepage');
+          // Example: Track bot visits separately in analytics
+          // trackBotVisit();
+        } else {
+          // Handle human traffic
+          console.log('Human visitor detected');
+          // Example: Track human visits
+          // trackHumanVisit();
+        }
+      } catch (error) {
+        console.error('Bot detection failed:', error);
+      }
+    };
+
+    // Run bot detection when reCAPTCHA is loaded
+    if (isLoaded) {
+      performBotDetection();
+    }
+  }, [isLoaded, detectBot]);
 
   const scrollToTop = () => {
     window.scrollTo({
