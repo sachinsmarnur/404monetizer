@@ -52,8 +52,7 @@ export async function POST(request: NextRequest) {
     const threshold = 0.5; // Adjust this threshold based on your needs
     const isBot = score < threshold;
 
-    // Log for monitoring (remove in production or implement proper logging)
-    console.log(`reCAPTCHA verification - Score: ${score}, Action: ${action}, Bot: ${isBot}`);
+    // Bot detection completed
 
     return NextResponse.json({
       success: true,

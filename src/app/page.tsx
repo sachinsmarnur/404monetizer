@@ -102,18 +102,13 @@ export default function Home() {
         
         setBotDetectionResult(result);
 
-        // Log the result for monitoring (remove in production)
-        console.log('Bot detection result:', result);
-
         // Optional: You can take actions based on bot detection
         if (isBot) {
           // Handle bot traffic (e.g., show different content, track separately, etc.)
-          console.warn('Bot detected on homepage');
           // Example: Track bot visits separately in analytics
           // trackBotVisit();
         } else {
           // Handle human traffic
-          console.log('Human visitor detected');
           // Example: Track human visits
           // trackHumanVisit();
         }
