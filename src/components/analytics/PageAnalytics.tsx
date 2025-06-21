@@ -1,8 +1,10 @@
 "use client";
 
 import * as React from "react";
+import { useState } from "react";
 import { Eye, MousePointerClick, DollarSign, BarChart, Calendar, Users, Globe, Smartphone } from "lucide-react";
 import { AnalyticsCard } from "./AnalyticsCard";
+import { DetailedAnalyticsModal } from "./DetailedAnalyticsModal";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,8 +36,56 @@ interface Analytics {
   countries?: any[];
 }
 
+interface ModalState {
+  isOpen: boolean;
+  metricType: 'views' | 'conversions' | 'revenue' | 'conversion-rate';
+  title: string;
+}
+
+// Enhanced Modal component that can handle both summary and page-specific data
+function PageDetailedAnalyticsModal({
+  isOpen,
+  onClose,
+  metricType,
+  title,
+  pageId,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  metricType: 'views' | 'conversions' | 'revenue' | 'conversion-rate';
+  title: string;
+  pageId?: string | number;
+}) {
+  return (
+    <DetailedAnalyticsModal
+      isOpen={isOpen}
+      onClose={onClose}
+      metricType={metricType}
+      title={title}
+      pageId={pageId}
+    />
+  );
+}
+
 export function PageAnalytics({ pageId }: PageAnalyticsProps) {
   const { analytics, error, isLoading } = usePageAnalytics(pageId);
+  const [modalState, setModalState] = useState<ModalState>({
+    isOpen: false,
+    metricType: 'views',
+    title: ''
+  });
+
+  const handleCardClick = (metricType: 'views' | 'conversions' | 'revenue' | 'conversion-rate', title: string) => {
+    setModalState({
+      isOpen: true,
+      metricType,
+      title
+    });
+  };
+
+  const handleCloseModal = () => {
+    setModalState(prev => ({ ...prev, isOpen: false }));
+  };
 
   if (error) {
     return (
@@ -83,6 +133,14 @@ export function PageAnalytics({ pageId }: PageAnalyticsProps) {
 
   return (
     <div className="space-y-6">
+      {/* Page Title */}
+      {page && (
+        <div>
+          <h3 className="text-lg font-semibold">{page.title}</h3>
+          <p className="text-sm text-muted-foreground">Page Analytics</p>
+        </div>
+      )}
+
       {/* Main Analytics Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <AnalyticsCard
@@ -90,28 +148,36 @@ export function PageAnalytics({ pageId }: PageAnalyticsProps) {
           value={today.views.toLocaleString()}
           description={`Total: ${total.views.toLocaleString()}`}
           icon={<Eye />}
-          className="h-full"
+          className="h-full group"
+          clickable={true}
+          onClick={() => handleCardClick('views', "Today's Views")}
         />
         <AnalyticsCard
           title="Today's Conversions"
           value={today.conversions.toLocaleString()}
           description={`Total: ${total.conversions.toLocaleString()}`}
           icon={<MousePointerClick />}
-          className="h-full"
+          className="h-full group"
+          clickable={true}
+          onClick={() => handleCardClick('conversions', "Today's Conversions")}
         />
         <AnalyticsCard
           title="Today's Revenue"
           value={`$${Number.isFinite(todayRevenue) ? todayRevenue.toFixed(2) : '0.00'}`}
           description={`Total: $${Number.isFinite(totalRevenue) ? totalRevenue.toFixed(2) : '0.00'}`}
           icon={<DollarSign />}
-          className="h-full"
+          className="h-full group"
+          clickable={true}
+          onClick={() => handleCardClick('revenue', "Today's Revenue")}
         />
         <AnalyticsCard
           title="Conversion Rate"
           value={`${ctr}%`}
           description="Conversions / Views"
           icon={<BarChart />}
-          className="h-full"
+          className="h-full group"
+          clickable={true}
+          onClick={() => handleCardClick('conversion-rate', "Conversion Rate")}
         />
       </div>
 
@@ -199,14 +265,19 @@ export function PageAnalytics({ pageId }: PageAnalyticsProps) {
         <Alert>
           <Calendar className="h-4 w-4" />
           <AlertDescription>
-            <strong>No data yet!</strong> Your analytics will appear here once visitors start viewing your 404 page.
-            <br />
-            <span className="text-sm text-muted-foreground mt-2 block">
-              Make sure your page status is set to "Active" and you've implemented the 404 redirect properly.
-            </span>
+            No analytics data available yet for this page. Analytics will appear here once visitors start viewing this 404 page.
           </AlertDescription>
         </Alert>
       )}
+
+      {/* Detailed Analytics Modal */}
+      <PageDetailedAnalyticsModal
+        isOpen={modalState.isOpen}
+        onClose={handleCloseModal}
+        metricType={modalState.metricType}
+        title={modalState.title}
+        pageId={pageId}
+      />
     </div>
   );
 } 

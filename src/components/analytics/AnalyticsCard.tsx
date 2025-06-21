@@ -7,6 +7,8 @@ interface AnalyticsCardProps {
   description?: string;
   className?: string;
   icon?: React.ReactNode;
+  onClick?: () => void;
+  clickable?: boolean;
 }
 
 export function AnalyticsCard({
@@ -14,16 +16,28 @@ export function AnalyticsCard({
   value,
   description,
   className,
-  icon
+  icon,
+  onClick,
+  clickable = false
 }: AnalyticsCardProps) {
   return (
-    <Card className={cn("overflow-hidden flex flex-col", className)}>
+    <Card 
+      className={cn(
+        "overflow-hidden flex flex-col",
+        clickable && "cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] hover:border-primary/50",
+        className
+      )}
+      onClick={clickable ? onClick : undefined}
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">
           {title}
         </CardTitle>
         {icon && (
-          <div className="h-4 w-4 text-muted-foreground flex-shrink-0">
+          <div className={cn(
+            "h-4 w-4 text-muted-foreground flex-shrink-0 transition-colors",
+            clickable && "group-hover:text-primary"
+          )}>
             {icon}
           </div>
         )}
@@ -35,6 +49,11 @@ export function AnalyticsCard({
         {description && (
           <p className="text-xs text-muted-foreground mt-2">
             {description}
+          </p>
+        )}
+        {clickable && (
+          <p className="text-xs text-primary mt-2 opacity-0 transition-opacity group-hover:opacity-100">
+            Click to view detailed analytics →
           </p>
         )}
       </CardContent>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Eye, MousePointerClick, DollarSign, BarChart, Globe, Smartphone, Users, Trash2 } from "lucide-react";
 import { AnalyticsCard } from "./AnalyticsCard";
+import { DetailedAnalyticsModal } from "./DetailedAnalyticsModal";
 import { useAuth } from "@/contexts/auth-context";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,12 +38,23 @@ interface SummaryAnalytics {
   countries?: any[];
 }
 
+interface ModalState {
+  isOpen: boolean;
+  metricType: 'views' | 'conversions' | 'revenue' | 'conversion-rate';
+  title: string;
+}
+
 export function AnalyticsSummary() {
   const [analytics, setAnalytics] = useState<SummaryAnalytics | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isClearing, setIsClearing] = useState(false);
   const [clearDialogOpen, setClearDialogOpen] = useState(false);
+  const [modalState, setModalState] = useState<ModalState>({
+    isOpen: false,
+    metricType: 'views',
+    title: ''
+  });
   const { makeAuthenticatedRequest } = useAuth();
 
   const fetchSummaryAnalytics = async () => {
@@ -97,6 +109,18 @@ export function AnalyticsSummary() {
     } finally {
       setIsClearing(false);
     }
+  };
+
+  const handleCardClick = (metricType: 'views' | 'conversions' | 'revenue' | 'conversion-rate', title: string) => {
+    setModalState({
+      isOpen: true,
+      metricType,
+      title
+    });
+  };
+
+  const handleCloseModal = () => {
+    setModalState(prev => ({ ...prev, isOpen: false }));
   };
 
   useEffect(() => {
@@ -177,28 +201,36 @@ export function AnalyticsSummary() {
           value={today.views.toLocaleString()}
           description={`Total: ${total.views.toLocaleString()}`}
           icon={<Eye />}
-          className="h-full"
+          className="h-full group"
+          clickable={true}
+          onClick={() => handleCardClick('views', "Today's Views")}
         />
         <AnalyticsCard
           title="Today's Conversions"
           value={today.conversions.toLocaleString()}
           description={`Total: ${total.conversions.toLocaleString()}`}
           icon={<MousePointerClick />}
-          className="h-full"
+          className="h-full group"
+          clickable={true}
+          onClick={() => handleCardClick('conversions', "Today's Conversions")}
         />
         <AnalyticsCard
           title="Today's Revenue"
           value={`$${Number.isFinite(today.revenue) ? today.revenue.toFixed(2) : '0.00'}`}
           description={`Total: $${Number.isFinite(total.revenue) ? total.revenue.toFixed(2) : '0.00'}`}
           icon={<DollarSign />}
-          className="h-full"
+          className="h-full group"
+          clickable={true}
+          onClick={() => handleCardClick('revenue', "Today's Revenue")}
         />
         <AnalyticsCard
           title="Conversion Rate"
           value={`${ctr}%`}
           description="Conversions / Views"
           icon={<BarChart />}
-          className="h-full"
+          className="h-full group"
+          clickable={true}
+          onClick={() => handleCardClick('conversion-rate', "Conversion Rate")}
         />
       </div>
 
@@ -289,6 +321,14 @@ export function AnalyticsSummary() {
           </AlertDescription>
         </Alert>
       )}
+
+      {/* Detailed Analytics Modal */}
+      <DetailedAnalyticsModal
+        isOpen={modalState.isOpen}
+        onClose={handleCloseModal}
+        metricType={modalState.metricType}
+        title={modalState.title}
+      />
     </div>
   );
 } 
