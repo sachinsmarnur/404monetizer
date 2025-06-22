@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Head from "next/head";
 import { useRecaptcha } from "@/hooks/useRecaptcha";
+import { Animated404Preview } from "@/components/preview/PreviewComponents";
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -316,6 +317,29 @@ export default function Home() {
                   <Progress value={85} className="mt-3" aria-label="Monitor activity: 85%" />
                 </CardContent>
               </Card>
+            </motion.div>
+          </div>
+        </motion.section>
+
+        {/* Animated Preview Section */}
+        <motion.section 
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true }}
+          variants={staggerChildren}
+          className="bg-gradient-to-b from-background to-muted/30 py-24"
+          aria-label="Interactive preview demonstration"
+        >
+          <div className="container mx-auto px-4">
+            <motion.div variants={fadeIn} className="text-center max-w-3xl mx-auto mb-16">
+              <h2 className="text-3xl font-bold mb-4">Watch Your 404 Page Come to Life</h2>
+              <p className="text-muted-foreground text-lg">
+                See how easy it is to transform a boring error page into a revenue-generating machine. 
+                Follow the interactive demo below to see the magic happen in real-time.
+              </p>
+            </motion.div>
+            <motion.div variants={fadeIn}>
+              <Animated404Preview autoPlay={true} />
             </motion.div>
           </div>
         </motion.section>
@@ -1063,7 +1087,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               onClick={scrollToTop}
-              className="fixed bottom-8 right-8 p-3 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors z-50"
+              className="fixed bottom-8 right-8 p-3 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors z-50 cursor-pointer"
             >
               <ArrowUp className="h-6 w-6" />
             </motion.button>

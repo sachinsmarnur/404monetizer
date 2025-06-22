@@ -57,6 +57,243 @@ export function DetailedAnalyticsModal({
   const [timeRange, setTimeRange] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const { makeAuthenticatedRequest } = useAuth();
 
+  const processChartData = (metric: string, realData: any): AnalyticsData => {
+    const chartData = realData?.chartData || [];
+    const today = new Date();
+    // Ensure we get the local date string, not UTC
+    const todayStr = today.getFullYear() + '-' + 
+                     String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                     String(today.getDate()).padStart(2, '0');
+
+    // Process daily data from the real chartData
+    const dailyData = [];
+    const dataByDate = new Map();
+    
+    // First, add all the real data from chartData
+    chartData.forEach((item: any) => {
+      // Parse the UTC timestamp and convert to local date
+      const utcDate = new Date(item.date);
+      // Get the local date string (this accounts for timezone offset)
+      const dateStr = utcDate.getFullYear() + '-' + 
+                     String(utcDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                     String(utcDate.getDate()).padStart(2, '0');
+      const date = new Date(dateStr + 'T00:00:00'); // Create date in local timezone
+      let value = 0;
+      
+      switch (metric) {
+        case 'views':
+          value = Number(item.views) || 0;
+          break;
+        case 'conversions':
+          value = Number(item.conversions) || 0;
+          break;
+        case 'revenue':
+          value = Number(item.revenue) || 0;
+          break;
+        case 'conversion-rate':
+          const views = Number(item.views) || 0;
+          const conversions = Number(item.conversions) || 0;
+          value = views > 0 ? (conversions / views) * 100 : 0;
+          break;
+      }
+      
+      dataByDate.set(dateStr, {
+        name: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        value: metric === 'revenue' ? parseFloat(value.toFixed(2)) : parseFloat(value.toFixed(2)),
+        date: dateStr,
+      });
+    });
+
+    // Only add today's data if it's not already in chartData
+    if (realData?.today && !dataByDate.has(todayStr)) {
+      let todayValue = 0;
+      switch (metric) {
+        case 'views':
+          todayValue = Number(realData.today.views) || 0;
+          break;
+        case 'conversions':
+          todayValue = Number(realData.today.conversions) || 0;
+          break;
+        case 'revenue':
+          todayValue = Number(realData.today.revenue) || 0;
+          break;
+        case 'conversion-rate':
+          const todayViews = Number(realData.today.views) || 0;
+          const todayConversions = Number(realData.today.conversions) || 0;
+          todayValue = todayViews > 0 ? (todayConversions / todayViews) * 100 : 0;
+          break;
+      }
+      
+      // Add today's data point only if not already present
+      dataByDate.set(todayStr, {
+        name: today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        value: metric === 'revenue' ? parseFloat(todayValue.toFixed(2)) : parseFloat(todayValue.toFixed(2)),
+        date: todayStr,
+      });
+    }
+
+    // If we have total data but limited historical data, estimate yesterday's values
+    if (realData?.today && realData?.total && chartData.length === 0) {
+      const totalViews = Number(realData.total.views) || 0;
+      const totalConversions = Number(realData.total.conversions) || 0;
+      const totalRevenue = Number(realData.total.revenue) || 0;
+      
+      const todayViews = Number(realData.today.views) || 0;
+      const todayConversions = Number(realData.today.conversions) || 0;
+      const todayRevenue = Number(realData.today.revenue) || 0;
+      
+      // Calculate historical values (total - today)
+      const historicalViews = Math.max(0, totalViews - todayViews);
+      const historicalConversions = Math.max(0, totalConversions - todayConversions);
+      const historicalRevenue = Math.max(0, totalRevenue - todayRevenue);
+      
+      let historicalValue = 0;
+      switch (metric) {
+        case 'views':
+          historicalValue = historicalViews;
+          break;
+        case 'conversions':
+          historicalValue = historicalConversions;
+          break;
+        case 'revenue':
+          historicalValue = historicalRevenue;
+          break;
+        case 'conversion-rate':
+          // Calculate historical conversion rate from historical views/conversions
+          historicalValue = historicalViews > 0 ? (historicalConversions / historicalViews) * 100 : 0;
+          break;
+        default:
+          historicalValue = 0;
+      }
+      
+      // Add yesterday's estimated data if there's historical value
+      if (historicalValue > 0) {
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        
+
+        
+        dataByDate.set(yesterdayStr, {
+          name: yesterday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          value: metric === 'revenue' ? parseFloat(historicalValue.toFixed(2)) : parseFloat(historicalValue.toFixed(2)),
+          date: yesterdayStr,
+        });
+      }
+    }
+    
+    // Fill in missing days with 0 values for the last 30 days
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      if (dataByDate.has(dateStr)) {
+        const existingData = dataByDate.get(dateStr);
+        dailyData.push(existingData);
+      } else {
+        dailyData.push({
+          name: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          value: 0,
+          date: dateStr,
+        });
+      }
+    }
+    
+    // Generate weekly data by aggregating daily data
+    const weeklyData = [];
+    for (let i = 11; i >= 0; i--) {
+      const weekStart = new Date(today);
+      weekStart.setDate(weekStart.getDate() - (i * 7) - 6);
+      const weekEnd = new Date(today);
+      weekEnd.setDate(weekEnd.getDate() - (i * 7));
+      
+      let weeklyValue = 0;
+      let daysWithData = 0;
+      
+      for (let j = 0; j < 7; j++) {
+        const checkDate = new Date(weekStart);
+        checkDate.setDate(checkDate.getDate() + j);
+        const checkDateStr = checkDate.toISOString().split('T')[0];
+        
+        if (dataByDate.has(checkDateStr)) {
+          const dayData = dataByDate.get(checkDateStr);
+          if (metric === 'conversion-rate') {
+            // For conversion rate, we need to calculate it from the aggregated views/conversions
+            const dayViews = chartData.find((item: any) => item.date === checkDateStr)?.views || 0;
+            const dayConversions = chartData.find((item: any) => item.date === checkDateStr)?.conversions || 0;
+            if (dayViews > 0) {
+              weeklyValue += (dayConversions / dayViews) * 100;
+              daysWithData++;
+            }
+          } else {
+            weeklyValue += dayData.value;
+          }
+        }
+      }
+      
+      if (metric === 'conversion-rate' && daysWithData > 0) {
+        weeklyValue = weeklyValue / daysWithData; // Average conversion rate for the week
+      }
+      
+      weeklyData.push({
+        name: `Week ${12 - i}`,
+        value: metric === 'revenue' ? parseFloat(weeklyValue.toFixed(2)) : parseFloat(weeklyValue.toFixed(2)),
+        week: weekStart.toISOString().split('T')[0],
+      });
+    }
+    
+    // Generate monthly data by aggregating daily data
+    const monthlyData = [];
+    for (let i = 11; i >= 0; i--) {
+      const monthStart = new Date(today);
+      monthStart.setMonth(monthStart.getMonth() - i, 1);
+      const monthEnd = new Date(today);
+      monthEnd.setMonth(monthEnd.getMonth() - i + 1, 0);
+      
+      let monthlyValue = 0;
+      let daysWithData = 0;
+      
+      // Iterate through all days in the month
+      for (let day = monthStart.getDate(); day <= monthEnd.getDate(); day++) {
+        const checkDate = new Date(monthStart.getFullYear(), monthStart.getMonth(), day);
+        const checkDateStr = checkDate.toISOString().split('T')[0];
+        
+        if (dataByDate.has(checkDateStr)) {
+          const dayData = dataByDate.get(checkDateStr);
+          if (metric === 'conversion-rate') {
+            const dayViews = chartData.find((item: any) => item.date === checkDateStr)?.views || 0;
+            const dayConversions = chartData.find((item: any) => item.date === checkDateStr)?.conversions || 0;
+            if (dayViews > 0) {
+              monthlyValue += (dayConversions / dayViews) * 100;
+              daysWithData++;
+            }
+          } else {
+            monthlyValue += dayData.value;
+          }
+        }
+      }
+      
+      if (metric === 'conversion-rate' && daysWithData > 0) {
+        monthlyValue = monthlyValue / daysWithData; // Average conversion rate for the month
+      }
+      
+      monthlyData.push({
+        name: monthStart.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+        value: metric === 'revenue' ? parseFloat(monthlyValue.toFixed(2)) : parseFloat(monthlyValue.toFixed(2)),
+        month: monthStart.toISOString().split('T')[0],
+      });
+    }
+    
+
+    
+    return {
+      daily: dailyData,
+      weekly: weeklyData,
+      monthly: monthlyData,
+    };
+  };
+
   const fetchDetailedAnalytics = async () => {
     if (!isOpen) return;
     
@@ -71,8 +308,8 @@ export function DetailedAnalyticsModal({
       const response = await makeAuthenticatedRequest(apiEndpoint);
       const analyticsData = await response.json();
       
-      // Generate time-series data based on the metric type and real data
-      const processedData = generateTimeSeriesData(metricType, analyticsData);
+      // Use real chart data from the API response
+      const processedData = processChartData(metricType, analyticsData);
       setData(processedData);
     } catch (err) {
       console.error('Error fetching detailed analytics:', err);
@@ -83,135 +320,6 @@ export function DetailedAnalyticsModal({
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const generateTimeSeriesData = (metric: string, realData: any): AnalyticsData => {
-    const today = new Date();
-    const dailyData = [];
-    const weeklyData = [];
-    const monthlyData = [];
-
-    // Get the current values from real data
-    const currentViews = realData?.today?.views || 0;
-    const currentConversions = realData?.today?.conversions || 0;
-    const currentRevenue = realData?.today?.revenue || 0;
-    const totalViews = realData?.total?.views || 0;
-    const totalConversions = realData?.total?.conversions || 0;
-    const totalRevenue = realData?.total?.revenue || 0;
-
-    // Calculate historical daily average (excluding today)
-    const historicalDays = 29; // Last 29 days (excluding today)
-    let historicalTotal = 0;
-    let todayValue = 0;
-
-    switch (metric) {
-      case 'views':
-        historicalTotal = Math.max(0, totalViews - currentViews);
-        todayValue = currentViews;
-        break;
-      case 'conversions':
-        historicalTotal = Math.max(0, totalConversions - currentConversions);
-        todayValue = currentConversions;
-        break;
-      case 'revenue':
-        historicalTotal = Math.max(0, totalRevenue - currentRevenue);
-        todayValue = currentRevenue;
-        break;
-      case 'conversion-rate':
-        // For conversion rate, calculate based on daily views/conversions
-        todayValue = currentViews > 0 ? (currentConversions / currentViews) * 100 : 0;
-        historicalTotal = totalViews > currentViews ? ((totalConversions - currentConversions) / (totalViews - currentViews)) * 100 : 0;
-        break;
-    }
-
-    const historicalDailyAverage = historicalTotal / historicalDays;
-
-    // Generate daily data for last 30 days (ending with today's actual value)
-    for (let i = 29; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      
-      let value;
-      if (i === 0) {
-        // Use actual current value for today
-        value = todayValue;
-      } else {
-        // Generate realistic historical data based on historical average
-        const variation = 0.4; // 40% variation
-        const randomFactor = 0.6 + (Math.random() * variation);
-        value = Math.max(0, historicalDailyAverage * randomFactor);
-        
-        if (metric === 'conversion-rate') {
-          value = Math.min(value, 100); // Cap at 100%
-        }
-      }
-      
-      dailyData.push({
-        name: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        value: metric === 'revenue' ? parseFloat(value.toFixed(2)) : parseFloat(value.toFixed(2)),
-        date: date.toISOString().split('T')[0],
-      });
-    }
-
-    // Generate weekly data for last 12 weeks
-    for (let i = 11; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - (i * 7));
-      
-      let weeklyValue;
-      if (i === 0) {
-        // Current week includes today's value plus estimated remaining days
-        const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
-        const daysPassedThisWeek = dayOfWeek + 1;
-        const remainingDaysThisWeek = 7 - daysPassedThisWeek;
-        weeklyValue = todayValue + (historicalDailyAverage * remainingDaysThisWeek * (0.8 + Math.random() * 0.4));
-      } else {
-        weeklyValue = historicalDailyAverage * 7 * (0.6 + Math.random() * 0.8);
-      }
-      
-      if (metric === 'conversion-rate') {
-        weeklyValue = Math.min(weeklyValue, 100);
-      }
-      
-      weeklyData.push({
-        name: `Week ${12 - i}`,
-        value: metric === 'revenue' ? parseFloat(weeklyValue.toFixed(2)) : parseFloat(weeklyValue.toFixed(2)),
-        week: date.toISOString().split('T')[0],
-      });
-    }
-
-    // Generate monthly data for last 12 months
-    for (let i = 11; i >= 0; i--) {
-      const date = new Date(today);
-      date.setMonth(date.getMonth() - i);
-      
-      let monthlyValue;
-      if (i === 0) {
-        // Current month includes today's value plus estimated remaining days
-        const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-        const daysPassed = today.getDate();
-        const remainingDays = daysInMonth - daysPassed;
-        monthlyValue = todayValue + (historicalDailyAverage * remainingDays * (0.7 + Math.random() * 0.6));
-      } else {
-        monthlyValue = historicalDailyAverage * 30 * (0.5 + Math.random() * 1.0);
-      }
-      
-      if (metric === 'conversion-rate') {
-        monthlyValue = Math.min(monthlyValue, 100);
-      }
-      
-      monthlyData.push({
-        name: date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
-        value: metric === 'revenue' ? parseFloat(monthlyValue.toFixed(2)) : parseFloat(monthlyValue.toFixed(2)),
-        month: date.toISOString().split('T')[0],
-      });
-    }
-
-    return {
-      daily: dailyData,
-      weekly: weeklyData,
-      monthly: monthlyData,
-    };
   };
 
   const generateMockData = (metric: string): AnalyticsData => {
