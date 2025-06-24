@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Activity, DollarSign, Users, ArrowUpRight, Check, ArrowUp } from "lucide-react";
+import { Activity, DollarSign, Users, ArrowUpRight, Check, ArrowUp, Zap, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
@@ -242,9 +242,16 @@ export default function Home() {
           </motion.div>
           <motion.p 
             variants={fadeIn}
-            className="text-sm text-muted-foreground mt-4"
+            className="text-sm text-muted-foreground mt-4 flex items-center justify-center gap-4"
           >
-            ⚡ Setup in 2 minutes • 🔒 GDPR compliant
+            <span className="flex items-center gap-1">
+              <Zap className="h-4 w-4" />
+              Setup in 2 minutes
+            </span>
+            <span className="flex items-center gap-1">
+              <Shield className="h-4 w-4" />
+              GDPR compliant
+            </span>
           </motion.p>
         </motion.section>
 

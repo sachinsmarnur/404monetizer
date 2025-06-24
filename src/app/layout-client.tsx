@@ -20,6 +20,7 @@ import {
 import { FileWarning } from "lucide-react";
 import { TextAvatar } from "@/components/ui/text-avatar";
 import { SessionProvider } from "next-auth/react";
+import { CookieConsent } from "@/components/ui/cookie-consent";
 
 const inter = Inter({ subsets: ["latin"] });
 const roboto = Roboto({ subsets: ["latin"], weight: ["300", "400", "500", "700"] });
@@ -119,6 +120,7 @@ export default function RootLayout({
                   </main>
                   {shouldShowFooter && <Footer />}
                 </div>
+                <CookieConsent />
                 {!isDashboard && <Toaster />}
               </ThemeProvider>
             </AuthProvider>
