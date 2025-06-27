@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { config } from '@/lib/config';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
+import { sendWelcomePromoEmail } from '@/lib/email';
 
 // Extend the built-in session types
 declare module "next-auth" {
@@ -60,6 +61,29 @@ const handler = NextAuth({
             );
             
             userId = result.insertId;
+
+            // Send welcome email for new Google users (fallback if dashboard doesn't work)
+            try {
+              console.log(`📧 Attempting to send welcome email to new Google user: ${user.email}`);
+              console.log(`📧 SMTP_FROM_EMAIL configured: ${process.env.SMTP_FROM_EMAIL ? '✅ YES' : '❌ NO'}`);
+              
+              await sendWelcomePromoEmail(user.email!, user.name || 'User');
+              console.log(`✅ Welcome email sent successfully to ${user.email}`);
+              
+              // Record that welcome email was sent
+              await db.execute<ResultSetHeader>(
+                'INSERT INTO welcome_emails_sent (user_id, email, signup_method) VALUES (?, ?, ?)',
+                [userId, user.email, 'google_oauth']
+              );
+            } catch (emailError: any) {
+              console.error(`❌ Failed to send welcome email to ${user.email}:`, {
+                error: emailError.message,
+                code: emailError.code,
+                command: emailError.command,
+                response: emailError.response
+              });
+              // Don't fail the signin if email fails - dashboard will try again
+            }
           } else {
             userId = existingUsers[0].id;
           }

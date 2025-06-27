@@ -98,3 +98,14 @@ CREATE INDEX idx_analytics_user_id ON analytics(user_id);
 CREATE INDEX idx_analytics_page_id ON analytics(page_id);
 CREATE INDEX idx_analytics_date ON analytics(date);
 CREATE INDEX idx_contact_messages_created_at ON contact_messages(created_at);
+
+-- Welcome Emails Sent table
+CREATE TABLE IF NOT EXISTS welcome_emails_sent (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    signup_method ENUM('regular', 'google_oauth') NOT NULL,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_user_welcome (user_id)
+);

@@ -10,6 +10,7 @@ import {
   createRateLimitResponse,
   handleError 
 } from '@/lib/error-handler';
+import { sendWelcomePromoEmail } from '@/lib/email';
 
 // Rate limiting storage (in production, use Redis)
 const ipRateLimiter = new Map<string, number[]>();
@@ -123,6 +124,9 @@ export async function POST(req: Request) {
         config.jwt.secret,
         { expiresIn: '7d' }
       );
+
+      // Note: Welcome email will be sent on first successful login
+      console.log(`✅ User account created: ${email.toLowerCase()}, will send welcome email on first login`);
 
       const totalDuration = Date.now() - startTime;
       if (process.env.NODE_ENV === 'development') {

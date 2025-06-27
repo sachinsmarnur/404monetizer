@@ -23,6 +23,7 @@ export default function DashboardPage() {
     if (user) {
       fetchPageCount();
       checkFirstTimeUser();
+      sendWelcomeEmailIfNeeded();
     }
   }, [user]);
 
@@ -54,6 +55,31 @@ export default function DashboardPage() {
       localStorage.setItem(storageKey, 'true');
     } else {
       setIsFirstTimeUser(false);
+    }
+  };
+
+  const sendWelcomeEmailIfNeeded = async () => {
+    if (!user?.email) return;
+    
+    console.log(`🔍 Dashboard: Checking welcome email for user: ${user.email}`);
+    
+    try {
+      const response = await makeAuthenticatedRequest('/api/user/send-welcome-email', {
+        method: 'POST'
+      });
+      
+      const data = await response.json();
+      
+      if (data.success && !data.alreadySent) {
+        console.log('✅ Dashboard: Welcome email sent successfully');
+      } else if (data.alreadySent) {
+        console.log('📧 Dashboard: Welcome email already sent to this user');
+      } else {
+        console.log('⚠️ Dashboard: Welcome email API response:', data);
+      }
+    } catch (error) {
+      console.error('❌ Dashboard: Error sending welcome email:', error);
+      // Don't show error to user - welcome email is background operation
     }
   };
 

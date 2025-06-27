@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { db } from '@/lib/db';
 import jwt from 'jsonwebtoken';
+import type { RowDataPacket, ResultSetHeader } from 'mysql2';
+import { sendWelcomePromoEmail } from '@/lib/email';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -123,6 +125,42 @@ export async function POST(req: Request) {
     const totalDuration = Date.now() - startTime;
     if (process.env.NODE_ENV === 'development') {
       console.log(`Login completed in ${totalDuration}ms`);
+    }
+
+    // Check if we need to send welcome email (first login after signup)
+    try {
+      const [existingWelcomeEmails] = await db.execute<RowDataPacket[]>(
+        'SELECT id FROM welcome_emails_sent WHERE user_id = ?',
+        [user.id]
+      );
+
+      if (existingWelcomeEmails.length === 0) {
+        // This is the first login - send welcome email
+        console.log(`📧 Sending welcome email to ${user.email} (first login)`);
+        console.log(`📧 SMTP_FROM_EMAIL configured: ${process.env.SMTP_FROM_EMAIL ? '✅ YES' : '❌ NO'}`);
+        
+        try {
+          await sendWelcomePromoEmail(user.email, user.name);
+          console.log(`✅ Welcome email sent successfully to ${user.email}`);
+          
+          // Record that welcome email was sent
+          await db.execute<ResultSetHeader>(
+            'INSERT INTO welcome_emails_sent (user_id, email, signup_method) VALUES (?, ?, ?)',
+            [user.id, user.email, 'regular']
+          );
+        } catch (emailError: any) {
+          console.error(`❌ Failed to send welcome email to ${user.email}:`, {
+            error: emailError.message,
+            code: emailError.code,
+            command: emailError.command,
+            response: emailError.response
+          });
+          // Don't fail the login if email fails - just log it
+        }
+      }
+    } catch (welcomeEmailError) {
+      console.error('Error checking/sending welcome email:', welcomeEmailError);
+      // Don't fail the login if welcome email check fails
     }
 
     return NextResponse.json({
