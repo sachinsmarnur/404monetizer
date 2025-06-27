@@ -109,3 +109,19 @@ CREATE TABLE IF NOT EXISTS welcome_emails_sent (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE KEY unique_user_welcome (user_id)
 );
+
+-- Follow-up Marketing Emails Sent table
+CREATE TABLE IF NOT EXISTS followup_emails_sent (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    email_type ENUM('re_engagement', 'pro_promotion', 'feature_announcement') DEFAULT 're_engagement',
+    days_since_signup INT NOT NULL,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    opened_at TIMESTAMP NULL,
+    clicked_at TIMESTAMP NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_followup_user_id (user_id),
+    INDEX idx_followup_sent_at (sent_at),
+    INDEX idx_followup_email_type (email_type)
+);
