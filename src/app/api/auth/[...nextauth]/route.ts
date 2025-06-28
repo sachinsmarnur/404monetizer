@@ -64,11 +64,7 @@ const handler = NextAuth({
 
             // Send welcome email for new Google users (fallback if dashboard doesn't work)
             try {
-              console.log(`📧 Attempting to send welcome email to new Google user: ${user.email}`);
-              console.log(`📧 SMTP_FROM_EMAIL configured: ${process.env.SMTP_FROM_EMAIL ? '✅ YES' : '❌ NO'}`);
-              
               await sendWelcomePromoEmail(user.email!, user.name || 'User');
-              console.log(`✅ Welcome email sent successfully to ${user.email}`);
               
               // Record that welcome email was sent
               await db.execute<ResultSetHeader>(

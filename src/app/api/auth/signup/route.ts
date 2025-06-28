@@ -126,7 +126,6 @@ export async function POST(req: Request) {
       );
 
       // Note: Welcome email will be sent on first successful login
-      console.log(`✅ User account created: ${email.toLowerCase()}, will send welcome email on first login`);
 
       const totalDuration = Date.now() - startTime;
       if (process.env.NODE_ENV === 'development') {

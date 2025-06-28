@@ -72,12 +72,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Send welcome email
-    console.log(`📧 Sending welcome email to ${user.isGoogleAuth ? 'Google' : 'regular'} user: ${user.email}`);
-    console.log(`📧 SMTP_FROM_EMAIL configured: ${process.env.SMTP_FROM_EMAIL ? '✅ YES' : '❌ NO'}`);
-
     try {
       await sendWelcomePromoEmail(user.email, user.name);
-      console.log(`✅ Welcome email sent successfully to ${user.email}`);
 
       // Record that welcome email was sent
       await db.execute<ResultSetHeader>(

@@ -9,8 +9,8 @@ ADD COLUMN plan_expires_at TIMESTAMP NULL AFTER subscription_started_at;
 -- Create index for efficient expiration checking
 CREATE INDEX idx_users_plan_expires_at ON users(plan_expires_at);
 
--- Update page status enum to include 'suspended' for expired users
-ALTER TABLE pages MODIFY status ENUM('draft', 'active', 'suspended') DEFAULT 'draft';
+-- Update page status enum to include 'suspended' for expired users and 'archived' for archived pages
+ALTER TABLE pages MODIFY status ENUM('draft', 'active', 'suspended', 'archived') DEFAULT 'draft';
 
 -- Create index for page status
 CREATE INDEX idx_pages_status ON pages(status);

@@ -4,7 +4,7 @@ import { sendFollowUpMarketingEmail } from '@/lib/email';
 import type { RowDataPacket, ResultSetHeader } from 'mysql2';
 
 // Admin API key verification
-const ADMIN_API_KEY = process.env.ADMIN_API_KEY || 'your-secure-admin-key';
+const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,8 +18,6 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
     }
-
-    console.log('🔄 Starting follow-up email campaign...');
 
     // Get users who haven't received follow-up emails and registered more than 2 days ago
     const [eligibleUsers] = await db.execute<RowDataPacket[]>(`
@@ -44,16 +42,12 @@ export async function POST(req: NextRequest) {
       LIMIT 100
     `);
 
-    console.log(`📧 Found ${eligibleUsers.length} users eligible for follow-up emails`);
-
     let successCount = 0;
     let errorCount = 0;
     const errors: string[] = [];
 
     for (const user of eligibleUsers) {
       try {
-        console.log(`📧 Sending follow-up email to ${user.email} (${user.days_since_signup} days since signup)`);
-        
         // Send follow-up email
         await sendFollowUpMarketingEmail(
           user.email,
@@ -68,7 +62,6 @@ export async function POST(req: NextRequest) {
         );
 
         successCount++;
-        console.log(`✅ Follow-up email sent successfully to ${user.email}`);
 
         // Add a small delay to avoid overwhelming the email service
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -80,8 +73,6 @@ export async function POST(req: NextRequest) {
         errors.push(errorMsg);
       }
     }
-
-    console.log(`📊 Follow-up email campaign completed: ${successCount} sent, ${errorCount} failed`);
 
     return NextResponse.json({
       success: true,

@@ -136,12 +136,8 @@ export async function POST(req: Request) {
 
       if (existingWelcomeEmails.length === 0) {
         // This is the first login - send welcome email
-        console.log(`📧 Sending welcome email to ${user.email} (first login)`);
-        console.log(`📧 SMTP_FROM_EMAIL configured: ${process.env.SMTP_FROM_EMAIL ? '✅ YES' : '❌ NO'}`);
-        
         try {
           await sendWelcomePromoEmail(user.email, user.name);
-          console.log(`✅ Welcome email sent successfully to ${user.email}`);
           
           // Record that welcome email was sent
           await db.execute<ResultSetHeader>(

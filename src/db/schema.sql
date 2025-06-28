@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS pages (
     monetization_features JSON,
     custom_css TEXT,
     custom_js TEXT,
-    status VARCHAR(20) DEFAULT 'draft',
+    status ENUM('draft', 'active', 'suspended', 'archived') DEFAULT 'draft',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
