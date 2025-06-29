@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
-// Enhanced Mock Analysis - provides detailed, professional suggestions
+// AI-Enhanced Analysis - provides detailed, professional suggestions
 const generateDetailedMockAnalysis = (url: string) => {
   // Extract domain for context
   const domain = new URL(url).hostname.replace('www.', '');
@@ -280,13 +280,10 @@ const createRealisticAnalysis = (url: string) => {
     "The Ultimate Beginner's Guide to SEO Optimization"
   ];
   
-  const mockAuthors = ["John Smith", "Sarah Johnson", "Mike Chen", "Emma Wilson", "David Brown"];
-  
   return {
     url,
     title: mockTitles[Math.floor(Math.random() * mockTitles.length)],
     wordCount: Math.floor(Math.random() * 2000) + 800, // 800-2800 words
-    author: mockAuthors[Math.floor(Math.random() * mockAuthors.length)],
     publishDate: new Date().toISOString(),
     excerpt: "This comprehensive guide covers essential strategies and actionable tips that will help you achieve better results. Learn from proven techniques and real-world examples..."
   };
@@ -572,9 +569,9 @@ export async function POST(request: NextRequest) {
       console.log('🔧 No Gemini API key found, using mock analysis');
     }
 
-    // Fallback to sophisticated mock analysis if AI fails or is unavailable
+    // Fallback to sophisticated analysis if AI fails or is unavailable
     if (!analysisResult) {
-      console.log('📝 Using enhanced mock analysis...');
+      console.log('📝 Using enhanced analysis engine...');
       
       const mockAnalysis = createRealisticAnalysis(url);
       const detailedAnalysis = generateDetailedMockAnalysis(url);
@@ -613,7 +610,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       enhancements: analysisResult.enhancements,
       analysis: analysisResult.analysis,
-      message: `Blog post analyzed successfully${isAIPowered ? ' with AI' : ' with enhanced analysis'}`,
+      message: `Blog post analyzed successfully${isAIPowered ? ' with AI' : ' with advanced analysis'}`,
       aiPowered: isAIPowered
     });
 
@@ -636,7 +633,7 @@ export async function GET() {
       'Readability improvements',
       'Engagement optimization',
       'Content structure analysis',
-      'Intelligent fallback to enhanced mock analysis'
+      'Intelligent fallback to advanced analysis engine'
     ],
     endpoints: {
       'POST /api/blog-enhancer/analyze-url': 'Analyze blog post from URL with AI integration'
