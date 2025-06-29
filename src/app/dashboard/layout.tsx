@@ -17,7 +17,9 @@ import {
   ChevronDown,
   LogOut,
   User,
-  Crown
+  Crown,
+  Package,
+  PenTool
 } from "lucide-react";
 import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/contexts/auth-context";
@@ -55,6 +57,16 @@ const sidebarItems = [
     title: "Analytics",
     href: "/dashboard/analytics",
     icon: BarChart2,
+  },
+  {
+    title: "Blog Post Enhancer",
+    href: "/dashboard/blog-enhancer",
+    icon: PenTool,
+  },
+  {
+    title: "WordPress Plugins",
+    href: "/dashboard/wordpress-plugins",
+    icon: Package,
   },
   {
     title: "Settings",

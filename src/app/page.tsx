@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Activity, DollarSign, Users, ArrowUpRight, Check, ArrowUp, Zap, Shield } from "lucide-react";
+import { Activity, DollarSign, Users, ArrowUpRight, Check, ArrowUp, Zap, Shield, Sparkles, FileText, Crown, Download, PenTool } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
@@ -39,7 +39,7 @@ const structuredData = {
   "name": "404 Monetizer",
   "applicationCategory": "BusinessApplication",
   "operatingSystem": "Web Browser",
-  "description": "Transform your 404 error pages into revenue opportunities with smart redirections and real-time analytics. Recover lost visitors and boost conversions by 85%.",
+  "description": "Transform your 404 error pages into revenue opportunities with smart redirections and real-time analytics. Plus get exclusive AI blog enhancement tools and premium WordPress plugins worth $500+. Recover lost visitors and boost conversions by 85%.",
   "url": "https://404monetizer.com",
   "author": {
     "@type": "Organization",
@@ -63,7 +63,9 @@ const structuredData = {
     "Real-time analytics dashboard", 
     "Revenue tracking",
     "Conversion optimization",
-    "Multi-platform integration"
+    "Multi-platform integration",
+    "AI-powered blog post enhancement",
+    "Premium WordPress plugins collection"
   ]
 };
 
@@ -198,21 +200,73 @@ export default function Home() {
               404 Monetizer
             </motion.span>
           </motion.h1>
-          <motion.p 
+                    <motion.div 
             variants={fadeIn}
             className="mt-6 text-xl text-muted-foreground max-w-3xl"
             role="doc-subtitle"
           >
-            Transform your 404 error pages into revenue-generating opportunities.
-            No more wasted traffic, recover those visitors, subscribers, leads and boost your revenue with just one click.
-          </motion.p>
+            <p>
+              Transform your 404 error pages into revenue-generating opportunities.
+              No more wasted traffic, recover those visitors, subscribers, leads and boost your revenue with just one click.
+            </p>
+            <motion.div 
+              className="block mt-2 text-lg relative overflow-hidden"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
+              {/* Background gradient sweep */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-100/20 to-transparent -skew-x-12"
+                animate={{
+                  x: ["-100%", "100%"]
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  repeatDelay: 2
+                }}
+              />
+              
+              {/* Infinite word-by-word typewriter effect */}
+              {"Plus: Pro users get exclusive AI blog enhancement tools and premium WordPress plugins worth $500+".split(" ").map((word, index) => {
+                const totalWords = "Plus: Pro users get exclusive AI blog enhancement tools and premium WordPress plugins worth $500+".split(" ").length;
+                const cycleDuration = totalWords * 0.3 + 2; // Time for all words + pause
+                
+                return (
+                  <motion.span
+                    key={index}
+                    animate={{
+                      opacity: [0, 0, 1, 1, 1, 0, 0]
+                    }}
+                    transition={{
+                      duration: cycleDuration,
+                      repeat: Infinity,
+                      times: [0, (index * 0.3) / cycleDuration, (index * 0.3 + 0.2) / cycleDuration, 0.8, 0.9, 0.95, 1],
+                      ease: "easeInOut"
+                    }}
+                    className={`inline-block mr-2 ${
+                      word === "Plus:" 
+                        ? "text-foreground font-bold" 
+                        : word === "$500+" 
+                        ? "text-foreground font-bold" 
+                        : ""
+                    }`}
+                  >
+                    {word}
+                  </motion.span>
+                );
+              })}
+            </motion.div>
+          </motion.div>
           <motion.div 
             variants={fadeIn}
             className="flex flex-col items-center mt-6"
             role="complementary"
             aria-label="Performance statistics"
           >
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6 flex-wrap justify-center">
               <span className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" aria-hidden="true"></div>
                 <span className="font-medium">45,231+ visitors recovered</span>
@@ -221,6 +275,8 @@ export default function Home() {
               <span className="font-medium">$127K+ revenue generated</span>
               <span aria-hidden="true">•</span>
               <span className="font-medium">3.2% avg conversion rate</span>
+              <span aria-hidden="true">•</span>
+              <span className="font-medium text-600">2,500+ blogs enhanced</span>
             </div>
           </motion.div>
           <motion.div 
@@ -509,6 +565,157 @@ export default function Home() {
               </Card>
             </TabsContent>
           </Tabs>
+        </motion.section>
+
+        {/* Pro Exclusive Features Section */}
+        <motion.section 
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true }}
+          variants={staggerChildren}
+          className="bg-gradient-to-b from-muted/30 to-background py-24 border-t border-border"
+          aria-labelledby="pro-features-heading"
+        >
+          <div className="container mx-auto px-4">
+            <motion.div variants={fadeIn} className="text-center max-w-4xl mx-auto mb-16">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <Crown className="h-6 w-6 text-foreground" />
+                <Badge className="bg-black text-white font-semibold px-4 py-1 border-0">
+                  Pro Exclusive
+                </Badge>
+              </div>
+              <h2 id="pro-features-heading" className="text-4xl font-bold mb-6">
+                Unlock Premium Tools That Drive Results
+              </h2>
+              <p className="text-muted-foreground text-lg">
+                Pro subscribers get exclusive access to AI-powered content optimization and premium WordPress resources
+                that can transform your entire content strategy - not just your 404 pages.
+              </p>
+            </motion.div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+              {/* Blog Post Enhancer */}
+              <motion.div 
+                variants={fadeIn}
+                className="relative group"
+              >
+                <Card className="h-full border-2 border-border group-hover:border-foreground/20 transition-all duration-300 bg-card">
+                  <CardHeader>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-3 bg-black rounded-lg border">
+                        <Sparkles className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-xl">AI Blog Post Enhancer</CardTitle>
+                        <Badge variant="outline" className="mt-1 border-border">Powered by Gemini AI</Badge>
+                      </div>
+                    </div>
+                    <CardDescription className="text-base">
+                      Transform your blog content with AI-powered optimization that analyzes and enhances your posts for maximum engagement and SEO performance.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-4 bg-muted rounded-lg border">
+                        <div className="text-2xl font-bold text-foreground">AI-Powered</div>
+                        <div className="text-xs text-muted-foreground">Content Analysis</div>
+                      </div>
+                      <div className="text-center p-4 bg-muted rounded-lg border">
+                        <div className="text-2xl font-bold text-foreground">Real-time</div>
+                        <div className="text-xs text-muted-foreground">SEO Optimization</div>
+                      </div>
+                    </div>
+                    <ul className="space-y-3 text-sm">
+                      <li className="flex items-center gap-2">
+                        <Check className="h-4 w-4 text-foreground" />
+                        <span>Automatic content extraction from any blog URL</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="h-4 w-4 text-foreground" />
+                        <span>AI-generated SEO improvements & suggestions</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="h-4 w-4 text-foreground" />
+                        <span>Readability & engagement optimization</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="h-4 w-4 text-foreground" />
+                        <span>Content structure & flow analysis</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* WordPress Plugins */}
+              <motion.div 
+                variants={fadeIn}
+                className="relative group"
+              >
+                <Card className="h-full border-2 border-border group-hover:border-foreground/20 transition-all duration-300 bg-card">
+                  <CardHeader>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-3 bg-black rounded-lg border">
+                        <Download className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-xl">Premium WordPress Plugins</CardTitle>
+                        <Badge variant="outline" className="mt-1 border-border">Worth $500+ Value</Badge>
+                      </div>
+                    </div>
+                    <CardDescription className="text-base">
+                      Get instant access to a curated collection of premium WordPress plugins that normally cost hundreds of dollars individually. Don't miss out on this opportunity to get access to these plugins for free.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-4 bg-muted rounded-lg border">
+                        <div className="text-2xl font-bold text-foreground">5+</div>
+                        <div className="text-xs text-muted-foreground">Premium Plugins</div>
+                      </div>
+                      <div className="text-center p-4 bg-muted rounded-lg border">
+                        <div className="text-2xl font-bold text-foreground">$500+</div>
+                        <div className="text-xs text-muted-foreground">Total Value</div>
+                      </div>
+                    </div>
+                    <ul className="space-y-3 text-sm">
+                      <li className="flex items-center gap-2">
+                        <Check className="h-4 w-4 text-foreground" />
+                        <span>Elementor Pro - Advanced page builder</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="h-4 w-4 text-foreground" />
+                        <span>Rank Math Pro - Premium SEO suite</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="h-4 w-4 text-foreground" />
+                        <span>Astra Pro - Professional themes</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="h-4 w-4 text-foreground" />
+                        <span>GeneratePress Premium & more</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+
+            {/* Call to Action */}
+            <motion.div variants={fadeIn} className="text-center mt-12">
+              <p className="text-muted-foreground mb-6">
+                These exclusive tools are included with your Pro subscription at no extra cost
+              </p>
+              <Button 
+                size="lg" 
+                onClick={handleProAccess}
+                disabled={loading}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg hover:scale-105 transition-all duration-200 px-8 font-semibold"
+              >
+                {loading ? 'Processing...' : 'Unlock Pro Features Now'}
+              </Button>
+            </motion.div>
+          </div>
         </motion.section>
 
         {/* Integration Showcase */}
@@ -813,6 +1020,14 @@ export default function Home() {
                     <Check className="h-4 w-4 mr-2" />
                     <span className="text-sm">No analytics</span>
                   </li>
+                  <li className="flex items-center opacity-50">
+                    <Check className="h-4 w-4 mr-2" />
+                    <span className="text-sm">Blog Post Enhancer</span>
+                  </li>
+                  <li className="flex items-center opacity-50">
+                    <Check className="h-4 w-4 mr-2" />
+                    <span className="text-sm">Premium Wordpress Plugins</span>
+                  </li>
                 </ul>
               </CardContent>
               <CardFooter className="mt-auto pt-6">
@@ -843,7 +1058,19 @@ export default function Home() {
                   </li>
                   <li className="flex items-center">
                     <Check className="h-4 w-4 mr-2 text-primary" />
+                    <span className="text-sm">Live Preview Editing</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="h-4 w-4 mr-2 text-primary" />
                     <span className="text-sm">Advanced monetization Suite</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="h-4 w-4 mr-2 text-primary" />
+                    <span className="text-sm">AI Blog Post Enhancer</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="h-4 w-4 mr-2 text-primary" />
+                    <span className="text-sm">Premium WordPress Plugins</span>
                   </li>
                   <li className="flex items-center">
                     <Check className="h-4 w-4 mr-2 text-primary" />
@@ -855,11 +1082,7 @@ export default function Home() {
                   </li>
                   <li className="flex items-center">
                     <Check className="h-4 w-4 mr-2 text-primary" />
-                    <span className="text-sm">Custom redirects</span>
-                  </li>
-                  <li className="flex items-center">
-                    <Check className="h-4 w-4 mr-2 text-primary" />
-                    <span className="text-sm">A/B testing</span>
+                    <span className="text-sm">Custom redirects & A/B testing</span>
                   </li>
                 </ul>
               </CardContent>
@@ -1041,9 +1264,9 @@ export default function Home() {
             <motion.div variants={fadeIn} className="h-full">
               <Card className="h-full flex flex-col">
                 <CardHeader className="flex-1">
-                  <CardTitle>What platforms do you support?</CardTitle>
+                  <CardTitle>What's included in the Pro subscription?</CardTitle>
                   <CardDescription className="mt-2">
-                    We support all major platforms including Next.js, React, Vue, Angular, WordPress, Shopify, and more. Custom integrations are available for Enterprise plans. Our platform is designed to work seamlessly with any web technology.
+                    Pro subscribers get advanced 404 monetization features, full analytics, priority support, plus exclusive access to our AI Blog Post Enhancer powered by Gemini AI and a premium WordPress plugins collection worth $500+. All included at no extra cost.
                   </CardDescription>
                 </CardHeader>
               </Card>
