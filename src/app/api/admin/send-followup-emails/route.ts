@@ -7,12 +7,19 @@ import type { RowDataPacket, ResultSetHeader } from 'mysql2';
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
 
 export async function POST(req: NextRequest) {
+  const startTime = new Date();
+  
   try {
-    // Verify admin access
+    // Check if request is from Vercel Cron or admin API key
     const authHeader = req.headers.get('authorization');
-    const providedKey = authHeader?.replace('Bearer ', '');
+    const cronSecret = req.headers.get('vercel-cron-secret');
     
-    if (!providedKey || providedKey !== ADMIN_API_KEY) {
+    // Verify either admin API key OR Vercel cron secret
+    const providedKey = authHeader?.replace('Bearer ', '');
+    const isValidAdmin = providedKey && providedKey === ADMIN_API_KEY;
+    const isValidCron = cronSecret && cronSecret === process.env.CRON_SECRET;
+    
+    if (!isValidAdmin && !isValidCron) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -69,14 +76,18 @@ export async function POST(req: NextRequest) {
       } catch (emailError: any) {
         errorCount++;
         const errorMsg = `❌ Failed to send follow-up email to ${user.email}: ${emailError.message}`;
-        console.error(errorMsg);
         errors.push(errorMsg);
       }
     }
 
+    const endTime = new Date();
+    const duration = endTime.getTime() - startTime.getTime();
+
     return NextResponse.json({
       success: true,
       message: `Follow-up email campaign completed`,
+      execution_time: `${duration}ms`,
+      timestamp: endTime.toISOString(),
       stats: {
         eligible_users: eligibleUsers.length,
         emails_sent: successCount,
@@ -86,10 +97,13 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Error in follow-up email campaign:', error);
+    const endTime = new Date();
+    const duration = endTime.getTime() - startTime.getTime();
     return NextResponse.json({
       success: false,
       message: 'Failed to run follow-up email campaign',
+      execution_time: `${duration}ms`,
+      timestamp: endTime.toISOString(),
       error: error.message
     }, { status: 500 });
   }
@@ -155,7 +169,6 @@ export async function GET(req: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Error checking eligible users:', error);
     return NextResponse.json({
       success: false,
       message: 'Failed to check eligible users',
